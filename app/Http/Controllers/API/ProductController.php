@@ -10,9 +10,15 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Product::with(['category', 'sizes', 'comboOffers'])->latest()->get();
+        $query = Product::with(['category', 'sizes', 'comboOffers'])->latest();
+        
+        if ($request->has('limit')) {
+            return $query->take($request->limit)->get();
+        }
+        
+        return $query->get();
     }
 
     public function store(Request $request)

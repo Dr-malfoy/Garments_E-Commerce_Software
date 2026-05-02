@@ -45,26 +45,37 @@ if (rootElement) {
             <AuthProvider>
                 <ThemeProvider>
                     <BrowserRouter>
-                        <Routes>
-                            {/* Public Routes */}
-                            {publicRoutes.map((route, index) => (
-                                <Route key={index} path={route.path} element={route.element} />
-                            ))}
-
-                            {/* Admin Protected Routes */}
-                            <Route path="/admin" element={
-                                <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
-                                    <AdminLayout />
-                                </ProtectedRoute>
-                            }>
-                                {adminRoutes.map((route, index) => (
-                                    <Route key={index} index={route.path === ''} path={route.path} element={route.element} />
+                        <React.Suspense fallback={
+                            <div className="h-screen w-full flex items-center justify-center bg-white">
+                                <div className="flex flex-col items-center gap-6">
+                                    <div className="relative w-16 h-16">
+                                        <div className="absolute inset-0 border-4 border-black/5 rounded-full"></div>
+                                        <div className="absolute inset-0 border-4 border-[#f53003] border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }>
+                            <Routes>
+                                {/* Public Routes */}
+                                {publicRoutes.map((route, index) => (
+                                    <Route key={index} path={route.path} element={route.element} />
                                 ))}
-                            </Route>
 
-                            {/* Catch-all Redirect */}
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
+                                {/* Admin Protected Routes */}
+                                <Route path="/admin" element={
+                                    <ProtectedRoute allowedRoles={['admin', 'superadmin']}>
+                                        <AdminLayout />
+                                    </ProtectedRoute>
+                                }>
+                                    {adminRoutes.map((route, index) => (
+                                        <Route key={index} index={route.path === ''} path={route.path} element={route.element} />
+                                    ))}
+                                </Route>
+
+                                {/* Catch-all Redirect */}
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </React.Suspense>
                     </BrowserRouter>
                 </ThemeProvider>
             </AuthProvider>

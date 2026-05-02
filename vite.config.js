@@ -12,4 +12,15 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+                    'vendor': ['axios'],
+                }
+            }
+        },
+        chunkSizeWarningLimit: 1000,
+    }
 });

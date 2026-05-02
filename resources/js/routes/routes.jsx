@@ -1,33 +1,34 @@
-import React from 'react';
-import App from '../pages/App';
-import Products from '../pages/Products';
-import Checkout from '../pages/Checkout';
-import TrackOrder from '../pages/TrackOrder';
-import Contact from '../pages/Contact';
+import React, { lazy } from 'react';
+
+// Public Pages
+const App = lazy(() => import('../pages/App'));
+const Products = lazy(() => import('../pages/Products'));
+const Checkout = lazy(() => import('../pages/Checkout'));
+const TrackOrder = lazy(() => import('../pages/TrackOrder'));
+const Contact = lazy(() => import('../pages/Contact'));
 
 // Admin Pages
-import AdminDashboard from '../pages/admin/Dashboard';
-import AdminLogin from '../pages/admin/Login';
-import AdminCategories from '../pages/admin/Categories';
-import AdminProducts from '../pages/admin/Products';
-import AdminOrders from '../pages/admin/Orders';
-import AdminSettings from '../pages/admin/Settings';
-import AdminCustomers from '../pages/admin/Customers';
-import AdminInventory from '../pages/admin/Inventory';
-import AdminReports from '../pages/admin/Reports';
-import AdminWebsite from '../pages/admin/WebsiteSettings';
-import AdminPricing from '../pages/admin/Pricing';
-import LogisticSettings from '../pages/admin/LogisticSettings';
+const AdminDashboard = lazy(() => import('../pages/admin/Dashboard'));
+const AdminCategories = lazy(() => import('../pages/admin/Categories'));
+const AdminProducts = lazy(() => import('../pages/admin/Products'));
+const AdminOrders = lazy(() => import('../pages/admin/Orders'));
+const AdminSettings = lazy(() => import('../pages/admin/Settings'));
+const AdminCustomers = lazy(() => import('../pages/admin/Customers'));
+const AdminInventory = lazy(() => import('../pages/admin/Inventory'));
+const AdminReports = lazy(() => import('../pages/admin/Reports'));
+const AdminWebsite = lazy(() => import('../pages/admin/WebsiteSettings'));
+const AdminPricing = lazy(() => import('../pages/admin/Pricing'));
+const LogisticSettings = lazy(() => import('../pages/admin/LogisticSettings'));
 
 // Pathao Courier Pages
-import PathaoSettings from '../pages/admin/Pathao/Settings';
-import PathaoStores from '../pages/admin/Pathao/Stores';
-import PathaoOrders from '../pages/admin/Pathao/Orders';
+const PathaoSettings = lazy(() => import('../pages/admin/Pathao/Settings'));
+const PathaoStores = lazy(() => import('../pages/admin/Pathao/Stores'));
+const PathaoOrders = lazy(() => import('../pages/admin/Pathao/Orders'));
 
-// Auth Pages (to be created/updated)
-import Login from '../pages/auth/Login';
-import Register from '../pages/auth/Register';
-import ForgotPassword from '../pages/auth/ForgotPassword';
+// Auth Pages
+const Login = lazy(() => import('../pages/auth/Login'));
+const Register = lazy(() => import('../pages/auth/Register'));
+const ForgotPassword = lazy(() => import('../pages/auth/ForgotPassword'));
 
 export const publicRoutes = [
     { path: '/', element: <App /> },
@@ -59,3 +60,4 @@ export const adminRoutes = [
     { path: 'pathao/stores', element: <PathaoStores /> },
     { path: 'pathao/orders', element: <PathaoOrders /> },
 ];
+

@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 
 class CategoryController extends Controller
 {
     public function index()
     {
-        return Category::all();
+        return Cache::rememberForever('app_categories', function () {
+            return Category::all();
+        });
     }
 
     public function store(Request $request)
@@ -25,7 +28,9 @@ class CategoryController extends Controller
             'slug' => 'required|string|unique:categories,slug',
         ]);
 
-        return Category::create($validated);
+        $category = Category::create($validated);
+        Cache::forget('app_categories');
+        return $category;
     }
 
     public function show(Category $category)
@@ -45,12 +50,14 @@ class CategoryController extends Controller
         ]);
 
         $category->update($validated);
+        Cache::forget('app_categories');
         return $category;
     }
 
     public function destroy(Category $category)
     {
         $category->delete();
+        Cache::forget('app_categories');
         return response()->json(['message' => 'Deleted']);
     }
 }

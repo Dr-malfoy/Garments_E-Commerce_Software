@@ -22,7 +22,7 @@ const App = () => {
     const fetchInitialData = async () => {
         try {
             const [productsRes, categoriesRes, settingsRes] = await Promise.all([
-                axios.get('/api/public/products'),
+                axios.get('/api/public/products?limit=12'),
                 axios.get('/api/public/categories'),
                 axios.get('/api/public/settings')
             ]);

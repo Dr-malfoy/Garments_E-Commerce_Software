@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
 
 class SettingsController extends Controller
 {
     public function index()
     {
-        return Setting::pluck('value', 'key');
+        return Cache::rememberForever('app_settings', function () {
+            return Setting::pluck('value', 'key');
+        });
     }
 
     public function update(Request $request)
@@ -32,6 +35,8 @@ class SettingsController extends Controller
                 );
             }
         }
+
+        Cache::forget('app_settings');
 
         return response()->json([
             'message'  => 'Settings updated successfully',
