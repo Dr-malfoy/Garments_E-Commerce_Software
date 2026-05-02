@@ -7,12 +7,20 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Customer;
 use App\Models\Product;
+use App\Services\PathaoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrderController extends Controller
 {
+    protected $pathaoService;
+
+    public function __construct(PathaoService $pathaoService)
+    {
+        $this->pathaoService = $pathaoService;
+    }
+
     public function index()
     {
         return Order::with('customer')->latest()->get();
@@ -26,11 +34,15 @@ class OrderController extends Controller
             'district' => 'required|string',
             'thana' => 'required|string',
             'area' => 'nullable|string',
+            'pathao_city_id' => 'nullable|integer',
+            'pathao_zone_id' => 'nullable|integer',
+            'pathao_area_id' => 'nullable|integer',
             'product_id' => 'required|exists:products,id',
             'size' => 'required|string',
             'quantity' => 'required|integer|min:1',
             'unit_price' => 'required|numeric',
             'total_price' => 'required|numeric',
+            'delivery_charge' => 'nullable|numeric',
             'combo_offer_name' => 'nullable|string',
             'notes' => 'nullable|string',
         ]);
@@ -53,8 +65,11 @@ class OrderController extends Controller
                 'customer_id' => $customer->id,
                 'status' => 'pending',
                 'total_amount' => $validated['total_price'],
-                'delivery_charge' => 140, 
+                'delivery_charge' => $validated['delivery_charge'] ?? 140, 
                 'notes' => $validated['notes'],
+                'pathao_city_id' => $validated['pathao_city_id'],
+                'pathao_zone_id' => $validated['pathao_zone_id'],
+                'pathao_area_id' => $validated['pathao_area_id'],
             ]);
 
             OrderItem::create([
@@ -77,8 +92,50 @@ class OrderController extends Controller
 
     public function update(Request $request, Order $order)
     {
+        $oldStatus = $order->status;
         $order->update($request->only('status'));
+
+        // Auto create Pathao order if confirmed
+        if ($oldStatus !== 'confirmed' && $order->status === 'confirmed' && $order->pathao_area_id) {
+            $this->createPathaoOrder($order);
+        }
+
         return $order;
+    }
+
+    protected function createPathaoOrder(Order $order)
+    {
+        try {
+            $customer = $order->customer;
+            $item = $order->items()->first();
+            $product = $item->product;
+
+            $pathaoOrderData = [
+                'store_id' => 1, // You should make this configurable
+                'recipient_name' => $customer->name,
+                'recipient_phone' => $customer->phone,
+                'recipient_address' => $customer->area . ', ' . $customer->thana . ', ' . $customer->district,
+                'recipient_city_id' => $order->pathao_city_id,
+                'recipient_zone_id' => $order->pathao_zone_id,
+                'recipient_area_id' => $order->pathao_area_id,
+                'delivery_type' => 48, // Normal
+                'item_type' => 2, // Parcel
+                'item_quantity' => $item->qty,
+                'item_weight' => 0.5,
+                'amount_to_collect' => $order->total_amount + $order->delivery_charge,
+                'item_description' => $product->name . ' (Size: ' . $item->size . ')',
+            ];
+
+            $response = $this->pathaoService->createOrder($pathaoOrderData);
+            
+            if (isset($response['data']['consignment_id'])) {
+                $order->update([
+                    'consignment_id' => $response['data']['consignment_id']
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to auto-create Pathao order: " . $e->getMessage());
+        }
     }
 
     public function trackByPhone($phone)

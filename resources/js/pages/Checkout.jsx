@@ -20,9 +20,17 @@ const Checkout = () => {
         district: '',
         thana: '',
         area: '',
+        pathao_city_id: '',
+        pathao_zone_id: '',
+        pathao_area_id: '',
         size: '',
         notes: ''
     });
+
+    const [cities, setCities] = useState([]);
+    const [zones, setZones] = useState([]);
+    const [areas, setAreas] = useState([]);
+    const [deliveryCharge, setDeliveryCharge] = useState(140);
 
     const [loading, setLoading] = useState(false);
     const [fetchingSettings, setFetchingSettings] = useState(true);
@@ -35,11 +43,64 @@ const Checkout = () => {
             return;
         }
         fetchSettings();
+        fetchPathaoCities();
     }, [product]);
 
     useEffect(() => {
         calculateBestPrice();
     }, [quantity, product]);
+
+    const fetchPathaoCities = async () => {
+        try {
+            const res = await axios.get('/api/public/pathao/cities');
+            setCities(res.data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch cities', error);
+        }
+    };
+
+    const handleCityChange = async (cityId, cityName) => {
+        setFormData({ ...formData, pathao_city_id: cityId, district: cityName, pathao_zone_id: '', pathao_area_id: '' });
+        setZones([]);
+        setAreas([]);
+        try {
+            const res = await axios.get(`/api/public/pathao/zones/${cityId}`);
+            setZones(res.data.data || []);
+        } catch (error) {
+            console.error('Failed to fetch zones', error);
+        }
+    };
+
+    const handleZoneChange = async (zoneId, zoneName) => {
+        setFormData({ ...formData, pathao_zone_id: zoneId, thana: zoneName, pathao_area_id: '' });
+        setAreas([]);
+        try {
+            const res = await axios.get(`/api/public/pathao/areas/${zoneId}`);
+            setAreas(res.data.data || []);
+            // After selecting zone, we can estimate price
+            calculatePathaoPrice(zoneId);
+        } catch (error) {
+            console.error('Failed to fetch areas', error);
+        }
+    };
+
+    const calculatePathaoPrice = async (zoneId) => {
+        try {
+            const res = await axios.post('/api/public/pathao/check-price', {
+                store_id: 1, // Default store for now
+                recipient_city_id: formData.pathao_city_id,
+                recipient_zone_id: zoneId,
+                item_type: 2, // Parcel
+                item_weight: 0.5, // Default weight
+                delivery_type: 48 // Normal
+            });
+            if (res.data.data) {
+                setDeliveryCharge(res.data.data.price);
+            }
+        } catch (error) {
+            console.error('Failed to calculate Pathao price', error);
+        }
+    };
 
     const calculateBestPrice = () => {
         if (!product) return;
@@ -81,6 +142,10 @@ const Checkout = () => {
             alert('Please select a size');
             return;
         }
+        if (!formData.pathao_area_id) {
+            alert('Please select your delivery area');
+            return;
+        }
         setLoading(true);
         try {
             const response = await axios.post('/api/public/orders', {
@@ -89,6 +154,7 @@ const Checkout = () => {
                 quantity: quantity,
                 unit_price: product.price,
                 total_price: calculatedPrice,
+                delivery_charge: deliveryCharge,
                 combo_offer_name: appliedOffer ? appliedOffer.name : null
             });
             setOrderId(response.data.order_id);
@@ -190,11 +256,11 @@ const Checkout = () => {
                                      </div>
                                      <div className="flex justify-between text-sm font-bold text-[#706f6c]">
                                          <span className="uppercase tracking-widest">Courier Fee</span>
-                                         <span className="text-[#1b1b18]">140 Tk</span>
+                                         <span className="text-[#1b1b18]">{deliveryCharge} Tk</span>
                                      </div>
                                      <div className="flex justify-between items-center pt-6 border-t border-black/5">
                                          <span className="text-lg font-black uppercase tracking-[0.3em] text-black/30">Total</span>
-                                         <span className="text-3xl font-black text-[#1b1b18]">{(parseFloat(calculatedPrice) + 140).toFixed(2)} Tk</span>
+                                         <span className="text-3xl font-black text-[#1b1b18]">{(parseFloat(calculatedPrice) + parseFloat(deliveryCharge)).toFixed(2)} Tk</span>
                                      </div>
                                  </div>
                              </div>
@@ -249,26 +315,51 @@ const Checkout = () => {
 
                             <div className="grid md:grid-cols-2 gap-10">
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">District</label>
-                                    <input
-                                        type="text"
+                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">City</label>
+                                    <select
                                         required
-                                        value={formData.district}
-                                        onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                                        value={formData.pathao_city_id}
+                                        onChange={(e) => handleCityChange(e.target.value, e.target.options[e.target.selectedIndex].text)}
                                         className="w-full px-8 py-6 bg-white border-2 border-black/5 rounded-[24px] focus:border-[#1b1b18] outline-none text-sm font-bold transition-all shadow-sm"
-                                        placeholder="e.g. Dhaka"
-                                    />
+                                    >
+                                        <option value="">Select City</option>
+                                        {cities.map(c => <option key={c.city_id} value={c.city_id}>{c.city_name}</option>)}
+                                    </select>
                                 </div>
                                 <div className="space-y-3">
-                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">Thana</label>
-                                    <input
-                                        type="text"
+                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">Zone</label>
+                                    <select
                                         required
-                                        value={formData.thana}
-                                        onChange={(e) => setFormData({ ...formData, thana: e.target.value })}
-                                        className="w-full px-8 py-6 bg-white border-2 border-black/5 rounded-[24px] focus:border-[#1b1b18] outline-none text-sm font-bold transition-all shadow-sm"
-                                        placeholder="e.g. Dhanmondi"
-                                    />
+                                        disabled={!zones.length}
+                                        value={formData.pathao_zone_id}
+                                        onChange={(e) => handleZoneChange(e.target.value, e.target.options[e.target.selectedIndex].text)}
+                                        className="w-full px-8 py-6 bg-white border-2 border-black/5 rounded-[24px] focus:border-[#1b1b18] outline-none text-sm font-bold transition-all shadow-sm disabled:opacity-50"
+                                    >
+                                        <option value="">Select Zone</option>
+                                        {zones.map(z => <option key={z.zone_id} value={z.zone_id}>{z.zone_name}</option>)}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="grid md:grid-cols-2 gap-10">
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">Area</label>
+                                    <select
+                                        required
+                                        disabled={!areas.length}
+                                        value={formData.pathao_area_id}
+                                        onChange={(e) => setFormData({ ...formData, pathao_area_id: e.target.value, area: e.target.options[e.target.selectedIndex].text })}
+                                        className="w-full px-8 py-6 bg-white border-2 border-black/5 rounded-[24px] focus:border-[#1b1b18] outline-none text-sm font-bold transition-all shadow-sm disabled:opacity-50"
+                                    >
+                                        <option value="">Select Area</option>
+                                        {areas.map(a => <option key={a.area_id} value={a.area_id}>{a.area_name}</option>)}
+                                    </select>
+                                </div>
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black text-black/30 uppercase tracking-[0.3em] ml-2">Estimated Charge</label>
+                                    <div className="w-full px-8 py-6 bg-black/5 rounded-[24px] text-sm font-black text-[#1b1b18] flex items-center">
+                                        {deliveryCharge} Tk
+                                    </div>
                                 </div>
                             </div>
 

@@ -13,6 +13,8 @@ use App\Http\Controllers\API\InventoryController;
 use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\BannerController;
 use App\Http\Controllers\API\ComboOfferController;
+use App\Http\Controllers\API\PathaoController;
+use App\Http\Controllers\API\LogisticSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,6 +23,8 @@ use App\Http\Controllers\API\ComboOfferController;
 */
 
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -58,7 +62,28 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Banner Management
     Route::apiResource('banners', BannerController::class);
+
+    // Pathao Courier Routes
+    Route::prefix('pathao')->group(function () {
+        Route::get('/cities', [PathaoController::class, 'getCities']);
+        Route::get('/zones/{cityId}', [PathaoController::class, 'getZones']);
+        Route::get('/areas/{zoneId}', [PathaoController::class, 'getAreas']);
+        Route::get('/stores', [PathaoController::class, 'getStores']);
+        Route::post('/stores', [PathaoController::class, 'createStore']);
+        Route::post('/check-price', [PathaoController::class, 'checkPrice']);
+        Route::post('/orders', [PathaoController::class, 'createOrder']);
+        Route::get('/track/{consignmentId}', [PathaoController::class, 'trackOrder']);
+    });
+
+    // Logistic Settings Routes
+    Route::post('/logistic-settings/generate-secret', [LogisticSettingController::class, 'generateSecret']);
+    Route::get('/logistic-settings', [LogisticSettingController::class, 'index']);
+    Route::get('/logistic-settings/{name}', [LogisticSettingController::class, 'show']);
+    Route::post('/logistic-settings/{name}', [LogisticSettingController::class, 'update']);
 });
+
+// Pathao Webhook (Public)
+Route::post('/pathao/webhook', [PathaoController::class, 'webhook']);
 
 // Public routes for customer website
 Route::get('/public/categories', [CategoryController::class, 'index']);
@@ -70,3 +95,10 @@ Route::get('/public/track-order/{phone}', [OrderController::class, 'trackByPhone
 Route::post('/public/orders/{order}/cancel-request', [OrderController::class, 'requestCancel']);
 Route::post('/public/orders', [OrderController::class, 'store']);
 Route::post('/public/feedback', [FeedbackController::class, 'store']);
+
+// Public Pathao routes
+Route::get('/public/pathao/cities', [PathaoController::class, 'getCities']);
+Route::get('/public/pathao/zones/{cityId}', [PathaoController::class, 'getZones']);
+Route::get('/public/pathao/areas/{zoneId}', [PathaoController::class, 'getAreas']);
+Route::post('/public/pathao/check-price', [PathaoController::class, 'checkPrice']);
+

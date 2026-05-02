@@ -1,21 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Card = ({ label, value, sub, icon, color, bg }) => (
-    <div style={{ background: 'rgba(13,13,26,0.95)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, padding: 24, display: 'flex', flexDirection: 'column', gap: 16, transition: 'all 0.2s', cursor: 'default', position: 'relative', overflow: 'hidden' }}
-        onMouseEnter={e => { e.currentTarget.style.border = `1px solid ${color}40`; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 16px 40px rgba(0,0,0,0.4)`; }}
-        onMouseLeave={e => { e.currentTarget.style.border = '1px solid rgba(255,255,255,0.07)'; e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = 'none'; }}
+    <div className="group relative bg-[var(--admin-card-bg)] p-8 rounded-[32px] premium-shadow border border-[var(--admin-border)] hover:border-[#2563eb]/20 transition-all duration-500 overflow-hidden"
     >
-        <div style={{ position: 'absolute', top: 0, right: 0, width: 100, height: 100, borderRadius: '0 16px 0 100%', background: bg, opacity: 0.4 }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <div style={{ width: 42, height: 42, borderRadius: 12, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <svg style={{ width: 20, height: 20, color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">{icon}</svg>
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[var(--admin-input-bg)] group-hover:bg-[#2563eb]/5 rounded-full -translate-y-1/2 translate-x-1/2 transition-colors"></div>
+        
+        <div className="flex justify-between items-start mb-8 relative z-10">
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl font-black text-white shadow-xl" style={{ backgroundColor: color }}>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">{icon}</svg>
             </div>
-            {sub && <span style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', background: 'rgba(34,197,94,0.1)', padding: '3px 8px', borderRadius: 20, border: '1px solid rgba(34,197,94,0.15)' }}>{sub}</span>}
+            {sub && <span className="text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-500/10 px-3 py-1 rounded-full">{sub}</span>}
         </div>
-        <div>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.18em', color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>{label}</p>
-            <h3 style={{ fontSize: 30, fontWeight: 900, color: '#fff', letterSpacing: '-1px', lineHeight: 1 }}>{value}</h3>
+        
+        <div className="relative z-10">
+            <p className="text-[10px] font-black uppercase tracking-widest text-[var(--admin-text-muted)] mb-2">{label}</p>
+            <h3 className="text-4xl font-black tracking-tighter text-[var(--admin-text-bright)]">{value}</h3>
         </div>
     </div>
 );
@@ -75,64 +76,67 @@ const Dashboard = () => {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-            <div style={{ marginBottom: 32 }}>
-                <h1 style={{ fontSize: 28, fontWeight: 900, color: '#fff', margin: 0 }}>Dashboard</h1>
-                <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>Real-time overview of your garments business</p>
+        <div className="space-y-12 animate-fade-in">
+            <div className="flex justify-between items-center">
+                <div>
+                    <h1 className="text-4xl font-black tracking-tighter text-[var(--admin-text-bright)]">Control <span className="text-[#2563eb]">Center.</span></h1>
+                    <p className="text-[var(--admin-text-muted)] font-bold uppercase tracking-widest text-[10px] mt-1">Real-time business intelligence dashboard</p>
+                </div>
             </div>
             
             {/* KPI Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16 }}>
-                <Card label="Total Revenue" value={`৳${Number(stats.revenue).toLocaleString()}`} sub="This month"
-                    color="#2563eb" bg="rgba(37,99,235,0.12)"
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <Card label="Revenue" value={`৳${Number(stats.revenue).toLocaleString()}`} sub="+12.5%"
+                    color="#2563eb"
                     icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
                 />
-                <Card label="Total Orders" value={stats.orders} sub="+12% this week"
-                    color="#6366f1" bg="rgba(99,102,241,0.12)"
+                <Card label="Total Orders" value={stats.orders} sub="Today"
+                    color="#6366f1"
                     icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />}
                 />
-                <Card label="Products" value={stats.products} sub="In catalog"
-                    color="#06b6d4" bg="rgba(6,182,212,0.12)"
+                <Card label="Inventory" value={stats.products} sub="Active"
+                    color="#06b6d4"
                     icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />}
                 />
-                <Card label="Customers" value={stats.customers} sub="Registered"
-                    color="#a855f7" bg="rgba(168,85,247,0.12)"
+                <Card label="Audience" value={stats.customers} sub="Loyal"
+                    color="#a855f7"
                     icon={<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />}
                 />
             </div>
 
             {/* Cancel Requests Section */}
             {cancelRequests.length > 0 && (
-                <div style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 16, overflow: 'hidden' }}>
-                    <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(239,68,68,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div className="bg-[#ef4444]/5 border border-[#ef4444]/20 rounded-[32px] overflow-hidden">
+                    <div className="p-8 border-b border-[#ef4444]/10 flex items-center justify-between">
                         <div>
-                            <h3 style={{ color: '#ef4444', fontWeight: 800, fontSize: 16, margin: 0 }}>Cancellation Requests</h3>
-                            <p style={{ color: 'rgba(239,68,68,0.5)', fontSize: 12, marginTop: 3, fontWeight: 500 }}>Customers waiting for order termination</p>
+                            <h3 className="text-[#ef4444] font-black text-xl">Termination Requests</h3>
+                            <p className="text-[#ef4444]/50 text-[10px] uppercase font-black tracking-widest mt-1">Urgent order cancellations pending</p>
                         </div>
-                        <span style={{ background: '#ef4444', color: '#fff', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800 }}>{cancelRequests.length} Pending</span>
+                        <span className="bg-[#ef4444] text-white px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">{cancelRequests.length} Pending</span>
                     </div>
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
                             <thead>
-                                <tr style={{ background: 'rgba(239,68,68,0.02)' }}>
-                                    {['Slip ID', 'Customer', 'Phone', 'Amount', 'Current Status', 'Actions'].map(h => (
-                                        <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(239,68,68,0.6)', borderBottom: '1px solid rgba(239,68,68,0.1)' }}>{h}</th>
+                                <tr className="bg-[#ef4444]/5">
+                                    {['Slip ID', 'Customer', 'Amount', 'Actions'].map(h => (
+                                        <th key={h} className="p-6 text-left text-[10px] font-black uppercase tracking-widest text-[#ef4444]/60 border-b border-[#ef4444]/10">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {cancelRequests.map((order, i) => (
-                                    <tr key={order.id} style={{ borderBottom: i < cancelRequests.length - 1 ? '1px solid rgba(239,68,68,0.05)' : 'none' }}>
-                                        <td style={{ padding: '14px 20px', color: '#fff', fontWeight: 700, fontSize: 13 }}>#{order.order_id}</td>
-                                        <td style={{ padding: '14px 20px', color: '#fff', fontSize: 13 }}>{order.customer?.name}</td>
-                                        <td style={{ padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{order.customer?.phone}</td>
-                                        <td style={{ padding: '14px 20px', color: '#fff', fontWeight: 700, fontSize: 13 }}>৳{parseFloat(order.total_amount || 0).toLocaleString()}</td>
-                                        <td style={{ padding: '14px 20px' }}>
-                                            <span style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', color: '#ef4444' }}>{order.status}</span>
+                                {cancelRequests.map((order) => (
+                                    <tr key={order.id} className="border-b border-[#ef4444]/5 hover:bg-[#ef4444]/5 transition-colors">
+                                        <td className="p-6 text-[var(--admin-text-bright)] font-black">#{order.order_id}</td>
+                                        <td className="p-6">
+                                            <div className="font-bold text-[var(--admin-text-bright)]">{order.customer?.name}</div>
+                                            <div className="text-[10px] text-[var(--admin-text-muted)]">{order.customer?.phone}</div>
                                         </td>
-                                        <td style={{ padding: '14px 20px', display: 'flex', gap: 8 }}>
-                                            <button onClick={() => handleCancelAction(order.id, 'approve')} style={{ background: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Approve</button>
-                                            <button onClick={() => handleCancelAction(order.id, 'reject')} style={{ background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 800, cursor: 'pointer' }}>Reject</button>
+                                        <td className="p-6 text-[var(--admin-text-bright)] font-black">৳{parseFloat(order.total_amount || 0).toLocaleString()}</td>
+                                        <td className="p-6">
+                                            <div className="flex gap-4">
+                                                <button onClick={() => handleCancelAction(order.id, 'approve')} className="px-6 py-2 bg-[#ef4444] text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:brightness-110 transition-all shadow-lg shadow-[#ef4444]/20">Approve</button>
+                                                <button onClick={() => handleCancelAction(order.id, 'reject')} className="px-6 py-2 bg-[var(--admin-input-bg)] text-[var(--admin-text-bright)] rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-[var(--admin-border)] transition-all">Reject</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -143,57 +147,55 @@ const Dashboard = () => {
             )}
 
             {/* Recent Orders Table */}
-            <div style={{ background: 'rgba(13,13,26,0.95)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 16, overflow: 'hidden' }}>
-                <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div className="bg-[var(--admin-card-bg)] border border-[var(--admin-border)] rounded-[48px] premium-shadow overflow-hidden">
+                <div className="p-10 border-b border-[var(--admin-border)] flex items-center justify-between">
                     <div>
-                        <h3 style={{ color: '#fff', fontWeight: 800, fontSize: 16, margin: 0 }}>Recent Orders</h3>
-                        <p style={{ color: 'rgba(255,255,255,0.35)', fontSize: 12, marginTop: 3, fontWeight: 500 }}>Latest customer transactions</p>
+                        <h3 className="text-2xl font-black text-[var(--admin-text-bright)]">Recent Ledger</h3>
+                        <p className="text-[var(--admin-text-muted)] text-[10px] uppercase font-black tracking-widest mt-1">Latest customer transactions & status</p>
                     </div>
-                    <a href="/admin/orders" style={{ fontSize: 12, fontWeight: 700, color: '#2563eb', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
-                        View All →
-                    </a>
+                    <Link to="/admin/orders" className="text-[10px] font-black uppercase tracking-[0.2em] text-[#2563eb] hover:text-[#f53003] transition-colors flex items-center gap-2">
+                        View Full Ledger 
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+                    </Link>
                 </div>
 
                 {loading ? (
-                    <div style={{ padding: 48, textAlign: 'center', color: 'rgba(255,255,255,0.3)', fontSize: 14 }}>Loading orders...</div>
+                    <div className="p-24 text-center text-[var(--admin-text-muted)] text-[10px] uppercase font-black tracking-[0.4em] animate-pulse">Synchronizing Data...</div>
                 ) : orders.length === 0 ? (
-                    <div style={{ padding: 48, textAlign: 'center' }}>
-                        <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                            <svg style={{ width: 24, height: 24, color: 'rgba(255,255,255,0.2)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
+                    <div className="p-24 text-center">
+                        <div className="w-20 h-20 bg-[var(--admin-input-bg)] rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg className="w-8 h-8 text-[var(--admin-text-muted)]/20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                         </div>
-                        <p style={{ color: 'rgba(255,255,255,0.25)', fontSize: 13, fontWeight: 500 }}>No orders yet. Orders will appear here once customers place them.</p>
+                        <p className="text-[var(--admin-text-muted)] text-[10px] font-black uppercase tracking-widest">No transaction history found</p>
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
                             <thead>
-                                <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
-                                    {['Order ID', 'Customer', 'Amount', 'Items', 'Status', 'Date'].map(h => (
-                                        <th key={h} style={{ padding: '12px 20px', textAlign: 'left', fontSize: 10, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.04)', whiteSpace: 'nowrap' }}>{h}</th>
+                                <tr className="bg-[var(--admin-input-bg)]/30">
+                                    {['Order ID', 'Customer', 'Amount', 'Status', 'Timestamp'].map(h => (
+                                        <th key={h} className="px-8 py-6 text-left text-[10px] font-black uppercase tracking-widest text-[var(--admin-text-muted)] border-b border-[var(--admin-border)]">{h}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order, i) => {
+                                {orders.map((order) => {
                                     const st = statusStyle(order.status);
                                     return (
-                                        <tr key={order.id} style={{ borderBottom: i < orders.length - 1 ? '1px solid rgba(255,255,255,0.03)' : 'none', transition: 'background 0.15s' }}
-                                            onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.02)'}
-                                            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                                        >
-                                            <td style={{ padding: '14px 20px', color: '#2563eb', fontWeight: 700, fontSize: 13 }}>#{order.order_id || order.id}</td>
-                                            <td style={{ padding: '14px 20px', color: '#fff', fontWeight: 600, fontSize: 13 }}>{order.customer?.name || 'Guest'}</td>
-                                            <td style={{ padding: '14px 20px', color: '#fff', fontWeight: 700, fontSize: 13 }}>৳{parseFloat(order.total_amount || 0).toLocaleString()}</td>
-                                            <td style={{ padding: '14px 20px', color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>{order.items?.length || 0} item(s)</td>
-                                            <td style={{ padding: '14px 20px' }}>
-                                                <span style={{ padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, textTransform: 'capitalize', color: st.color, background: st.bg, border: `1px solid ${st.border}` }}>
+                                        <tr key={order.id} className="border-b border-[var(--admin-border)]/50 hover:bg-[var(--admin-input-bg)]/20 transition-all duration-300">
+                                            <td className="px-8 py-8 text-[#2563eb] font-black">#{order.order_id || order.id}</td>
+                                            <td className="px-8 py-8">
+                                                <div className="font-black text-[var(--admin-text-bright)]">{order.customer?.name || 'Guest'}</div>
+                                                <div className="text-[9px] font-bold text-[var(--admin-text-muted)] uppercase tracking-widest">{order.items?.length || 0} Products</div>
+                                            </td>
+                                            <td className="px-8 py-8 text-[var(--admin-text-bright)] font-black text-lg">৳{parseFloat(order.total_amount || 0).toLocaleString()}</td>
+                                            <td className="px-8 py-8">
+                                                <span className="px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest" style={{ color: st.color, background: st.bg, border: `1px solid ${st.border}` }}>
                                                     {order.status}
                                                 </span>
                                             </td>
-                                            <td style={{ padding: '14px 20px', color: 'rgba(255,255,255,0.3)', fontSize: 12, whiteSpace: 'nowrap' }}>
-                                                {order.created_at ? new Date(order.created_at).toLocaleDateString() : '—'}
+                                            <td className="px-8 py-8 text-[var(--admin-text-muted)] text-[10px] font-bold uppercase tracking-widest">
+                                                {order.created_at ? new Date(order.created_at).toLocaleDateString(undefined, { day: '2-digit', month: 'short', year: 'numeric' }) : '—'}
                                             </td>
                                         </tr>
                                     );

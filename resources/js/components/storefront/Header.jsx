@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const Header = ({ settings }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
+    const { user, token, logout } = useAuth();
 
     useEffect(() => {
         const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -57,9 +59,30 @@ const Header = ({ settings }) => {
 
                         {/* Right Side Actions */}
                         <div className="flex items-center gap-3">
-                            <Link to="/admin/login" className="hidden sm:flex px-6 py-2.5 bg-[#1b1b18] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-[#f53003] transition-all shadow-xl shadow-black/10">
-                                Portal
-                            </Link>
+                            {token ? (
+                                <div className="flex items-center gap-3">
+                                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                        <Link to="/admin" className="hidden sm:flex px-6 py-2.5 bg-[#1b1b18] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-[#f53003] transition-all shadow-xl shadow-black/10">
+                                            Admin
+                                        </Link>
+                                    )}
+                                    <button 
+                                        onClick={logout}
+                                        className="hidden sm:flex px-6 py-2.5 bg-black/5 text-[#1b1b18] text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-[#f53003] hover:text-white transition-all"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="hidden sm:flex px-6 py-2.5 bg-[#1b1b18] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-[#f53003] transition-all shadow-xl shadow-black/10">
+                                        Login
+                                    </Link>
+                                    <Link to="/register" className="hidden sm:flex px-6 py-2.5 bg-black/5 text-[#1b1b18] text-[11px] font-black uppercase tracking-[0.2em] rounded-full hover:bg-black/10 transition-all">
+                                        Join
+                                    </Link>
+                                </>
+                            )}
                             
                             {/* Mobile Toggle */}
                             <button 
@@ -102,13 +125,28 @@ const Header = ({ settings }) => {
                             ))}
                         </nav>
 
-                        <div className="mt-auto pt-12 border-t border-black/5">
-                            <p className="text-[10px] font-bold text-black/30 uppercase tracking-widest mb-6 leading-relaxed">
-                                Experience premium craftsmanship and modern aesthetics.
-                            </p>
-                            <Link to="/admin/login" className="flex items-center justify-center w-full py-5 bg-[#1b1b18] text-white text-xs font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-black/20">
-                                Admin Portal
-                            </Link>
+                        <div className="mt-auto pt-12 border-t border-black/5 space-y-4">
+                            {token ? (
+                                <>
+                                    {(user?.role === 'admin' || user?.role === 'superadmin') && (
+                                        <Link to="/admin" className="flex items-center justify-center w-full py-5 bg-[#1b1b18] text-white text-xs font-black uppercase tracking-[0.3em] rounded-2xl">
+                                            Admin Dashboard
+                                        </Link>
+                                    )}
+                                    <button onClick={logout} className="flex items-center justify-center w-full py-5 bg-black/5 text-[#1b1b18] text-xs font-black uppercase tracking-[0.3em] rounded-2xl">
+                                        Sign Out
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login" className="flex items-center justify-center w-full py-5 bg-[#1b1b18] text-white text-xs font-black uppercase tracking-[0.3em] rounded-2xl shadow-2xl shadow-black/20">
+                                        Login
+                                    </Link>
+                                    <Link to="/register" className="flex items-center justify-center w-full py-5 bg-black/5 text-[#1b1b18] text-xs font-black uppercase tracking-[0.3em] rounded-2xl">
+                                        Create Account
+                                    </Link>
+                                </>
+                            )}
                         </div>
                     </aside>
                 </div>

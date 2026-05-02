@@ -18,7 +18,11 @@ class Order extends Model
         'cancel_requested',
         'payment_status',
         'payment_method',
-        'notes'
+        'notes',
+        'pathao_city_id',
+        'pathao_zone_id',
+        'pathao_area_id',
+        'consignment_id'
     ];
 
     public function customer()

@@ -5,7 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [token, setToken] = useState(localStorage.getItem('admin_token'));
+    const [token, setToken] = useState(localStorage.getItem('auth_token'));
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,7 +23,6 @@ export const AuthProvider = ({ children }) => {
             setUser(response.data);
         } catch (error) {
             console.error('Failed to fetch user', error);
-            // If token is invalid, clear it
             if (error.response?.status === 401) {
                 logout();
             }
@@ -39,13 +38,36 @@ export const AuthProvider = ({ children }) => {
             
             setToken(token);
             setUser(user);
-            localStorage.setItem('admin_token', token);
+            localStorage.setItem('auth_token', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             
-            return true;
+            return { success: true };
         } catch (error) {
             console.error('Login failed', error);
-            return false;
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Login failed' 
+            };
+        }
+    };
+
+    const register = async (userData) => {
+        try {
+            const response = await axios.post('/api/register', userData);
+            const { token, user } = response.data;
+            
+            setToken(token);
+            setUser(user);
+            localStorage.setItem('auth_token', token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            
+            return { success: true };
+        } catch (error) {
+            console.error('Registration failed', error);
+            return { 
+                success: false, 
+                message: error.response?.data?.message || 'Registration failed' 
+            };
         }
     };
 
@@ -57,13 +79,13 @@ export const AuthProvider = ({ children }) => {
         } finally {
             setToken(null);
             setUser(null);
-            localStorage.removeItem('admin_token');
+            localStorage.removeItem('auth_token');
             delete axios.defaults.headers.common['Authorization'];
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
